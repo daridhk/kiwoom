@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QAxContainer import *
-from PyQt5.QtCore import QCoreApplication
+from PyQt5.QtCore import QCoreApplication, QDateTime, Qt
 from PyQt5.QtGui import QFont, QIcon
 import pandas as pd
 
@@ -66,7 +66,27 @@ class KiwoomAPIWindow(QMainWindow):
         menubar.setNativeMenuBar(False)
         filemenu = menubar.addMenu('&File')
         filemenu.addAction(exitAction)
-        self.statusBar().showMessage('Ready')
+
+        date = QDateTime.currentDateTime()
+        self.statusBar().showMessage(date.toString(Qt.DefaultLocaleLongDate))
+
+        # tableWidget
+        self.tableWidget = QTableWidget()
+        self.tableWidget.setRowCount(20)
+        self.tableWidget.setColumnCount(4)
+
+        self.tableWidget.setEditTriggers(QAbstractItemView.AllEditTriggers)
+
+        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+
+        for i in range(20):
+            for j in range(4):
+                self.tableWidget.setItem(i, j, QTableWidgetItem(str(i+j)))
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.tableWidget)
+        self.setLayout(layout)
+        #delete so far
 
         self.center()
         self.show()
@@ -76,7 +96,7 @@ class KiwoomAPIWindow(QMainWindow):
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
-        
+
     def login_event(self, error):
         if error == 0:
             strs = '로그인 성공 Code : ' + str(error)
