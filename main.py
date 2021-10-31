@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QAxContainer import *
 from PyQt5.QtCore import QCoreApplication
+from PyQt5.QtGui import QFont, QIcon
 import pandas as pd
 
 class KiwoomAPIWindow(QMainWindow):
@@ -51,11 +52,31 @@ class KiwoomAPIWindow(QMainWindow):
 
         btn1 = QPushButton('Quit', self)
         btn1.move(10,100)
+        QToolTip.setFont(QFont('SansSerif',14))
+        btn1.setToolTip('If pressed, it will <b>Quit</b>')
         btn1.resize(btn1.sizeHint())
         btn1.clicked.connect(QCoreApplication.instance().quit)
 
+        exitAction = QAction(QIcon('exit.png'), 'Exit', self)
+        exitAction.setShortcut('Ctrl+Q')
+        exitAction.setStatusTip('Exit application')
+        exitAction.triggered.connect(qApp.quit)
+
+        menubar = self.menuBar()
+        menubar.setNativeMenuBar(False)
+        filemenu = menubar.addMenu('&File')
+        filemenu.addAction(exitAction)
+        self.statusBar().showMessage('Ready')
+
+        self.center()
         self.show()
 
+    def center(self):
+        qr = self.frameGeometry()
+        cp = QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
+        
     def login_event(self, error):
         if error == 0:
             strs = '로그인 성공 Code : ' + str(error)
