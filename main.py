@@ -1,9 +1,15 @@
 import sys
+import time
+
 from PyQt5.QtWidgets import *
 from PyQt5.QAxContainer import *
 from PyQt5.QtCore import QCoreApplication, QDateTime, Qt
 from PyQt5.QtGui import QFont, QIcon
+from PyQt5 import uic
 import pandas as pd
+
+from Worker import Worker
+from tableWidget import *
 
 class KiwoomAPIWindow(QMainWindow):
     def __init__(self, connect=1):
@@ -121,8 +127,38 @@ class KiwoomAPIWindow(QMainWindow):
         print(df.head())
 
 
+Form_class, Window_class = uic.loadUiType("tableWidget.ui")
+
+class MyWindow2(Form_class, Window_class):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.btnStart.setEnabled(False)
+
+class MyWindow(Ui_Dialog, QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        #self.btnStart.setEnabled(False)
+        self.btnStart.clicked.connect(self.start_transaction)
+        self.btnStop.clicked.connect(self.stop_transaction)
+        self.btnClose.clicked.connect(QCoreApplication.instance().quit)
+        self.tableWidget.setEditTriggers(QAbstractItemView.AllEditTriggers)
+        #self.chbox = QCheckBox()
+        #self.tableWidget.setCellWidget(0,1, self.chbox)
+
+    def start_transaction(self):
+        print('start_transaction')
+        self.worker = Worker(self)
+        self.worker.start()
+
+    def stop_transaction(self):
+        self.worker.terminate()
+        print('stop_transaction')
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    kaWindow = KiwoomAPIWindow()
+    window = MyWindow()
+    window.show()
+
     app.exec_()
