@@ -1,9 +1,15 @@
 import sys
+import time
+
 from PyQt5.QtWidgets import *
 from PyQt5.QAxContainer import *
-from PyQt5.QtCore import QCoreApplication
+from PyQt5.QtCore import QCoreApplication, QDateTime, Qt
 from PyQt5.QtGui import QFont, QIcon
+from PyQt5 import uic
 import pandas as pd
+
+from Worker import Worker
+from tableWidget import *
 
 class KiwoomAPIWindow(QMainWindow):
     def __init__(self, connect=1):
@@ -66,7 +72,27 @@ class KiwoomAPIWindow(QMainWindow):
         menubar.setNativeMenuBar(False)
         filemenu = menubar.addMenu('&File')
         filemenu.addAction(exitAction)
-        self.statusBar().showMessage('Ready')
+
+        date = QDateTime.currentDateTime()
+        self.statusBar().showMessage(date.toString(Qt.DefaultLocaleLongDate))
+
+        # tableWidget
+        self.tableWidget = QTableWidget()
+        self.tableWidget.setRowCount(20)
+        self.tableWidget.setColumnCount(4)
+
+        self.tableWidget.setEditTriggers(QAbstractItemView.AllEditTriggers)
+
+        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+
+        for i in range(20):
+            for j in range(4):
+                self.tableWidget.setItem(i, j, QTableWidgetItem(str(i+j)))
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.tableWidget)
+        self.setLayout(layout)
+        #delete so far
 
         self.center()
         self.show()
@@ -76,7 +102,7 @@ class KiwoomAPIWindow(QMainWindow):
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
-        
+
     def login_event(self, error):
         if error == 0:
             strs = '로그인 성공 Code : ' + str(error)
@@ -101,8 +127,38 @@ class KiwoomAPIWindow(QMainWindow):
         print(df.head())
 
 
+Form_class, Window_class = uic.loadUiType("tableWidget.ui")
+
+class MyWindow2(Form_class, Window_class):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.btnStart.setEnabled(False)
+
+class MyWindow(Ui_Dialog, QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        #self.btnStart.setEnabled(False)
+        self.btnStart.clicked.connect(self.start_transaction)
+        self.btnStop.clicked.connect(self.stop_transaction)
+        self.btnClose.clicked.connect(QCoreApplication.instance().quit)
+        self.tableWidget.setEditTriggers(QAbstractItemView.AllEditTriggers)
+        #self.chbox = QCheckBox()
+        #self.tableWidget.setCellWidget(0,1, self.chbox)
+
+    def start_transaction(self):
+        print('start_transaction')
+        self.worker = Worker(self)
+        self.worker.start()
+
+    def stop_transaction(self):
+        self.worker.terminate()
+        print('stop_transaction')
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    kaWindow = KiwoomAPIWindow()
+    window = MyWindow()
+    window.show()
+
     app.exec_()
