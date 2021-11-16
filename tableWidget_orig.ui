@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1187</width>
-    <height>277</height>
+    <height>784</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <x>40</x>
      <y>90</y>
      <width>1131</width>
-     <height>121</height>
+     <height>621</height>
     </rect>
    </property>
    <property name="sizeIncrement">
@@ -32,7 +32,7 @@
     <cursorShape>ArrowCursor</cursorShape>
    </property>
    <property name="rowCount">
-    <number>3</number>
+    <number>10</number>
    </property>
    <property name="columnCount">
     <number>10</number>
@@ -40,54 +40,61 @@
    <row/>
    <row/>
    <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
    <column>
     <property name="text">
-     <string>item</string>
+     <string>종목명</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>expected pri</string>
+     <string>총매수예정금액</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>차수</string>
+     <string>매수차수</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>budg</string>
+     <string>보유금액</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>one pr</string>
+     <string>매수평단가</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>market</string>
+     <string>현재가</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>prof</string>
+     <string>수익률</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>target</string>
+     <string>목표수익률</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>y/n</string>
+     <string>진행여부</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>period</string>
+     <string>매수주기(시간)</string>
     </property>
    </column>
   </widget>
@@ -101,7 +108,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>auto</string>
+    <string>분할매수 자동매매</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
@@ -114,7 +121,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>serial</string>
+    <string>계좌번호</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="lineEdit">
@@ -130,8 +137,8 @@
   <widget class="QPushButton" name="btnStart">
    <property name="geometry">
     <rect>
-     <x>570</x>
-     <y>230</y>
+     <x>580</x>
+     <y>730</y>
      <width>121</width>
      <height>41</height>
     </rect>
@@ -143,8 +150,8 @@
   <widget class="QPushButton" name="btnClose">
    <property name="geometry">
     <rect>
-     <x>1030</x>
-     <y>230</y>
+     <x>1040</x>
+     <y>730</y>
      <width>111</width>
      <height>41</height>
     </rect>
@@ -156,8 +163,8 @@
   <widget class="QPushButton" name="btnStop">
    <property name="geometry">
     <rect>
-     <x>710</x>
-     <y>230</y>
+     <x>720</x>
+     <y>730</y>
      <width>121</width>
      <height>41</height>
     </rect>

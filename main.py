@@ -19,8 +19,8 @@ class KiwoomAPIWindow(QMainWindow):
         self.top = 50
         self.width = 640
         self.height = 480
-        self.initUI()
-        # self.connectKiwoom(connect)
+        # self.initUI()
+        self.connectKiwoom(connect)
 
     def connectKiwoom(self, connect=1):
         self.kiwoom = QAxWidget("KHOPENAPI.KHOpenAPICtrl.1")
@@ -29,7 +29,7 @@ class KiwoomAPIWindow(QMainWindow):
             self.kiwoom.dynamicCall("CommConnect()")
 
         # API 연결 되었는지를 Status Bar에 출력
-        self.kiwoom.OnEventConnect.connect(self.login_event)
+        #self.kiwoom.OnEventConnect.connect(self.login_event)
 
 
     def initUI(self):
@@ -156,10 +156,17 @@ class MyWindow(Ui_Dialog, QDialog):
         self.worker.terminate()
         print('stop_transaction')
 
+
+def connectKiwoom(self, connect=1):
+    kiwoom = QAxWidget("KHOPENAPI.KHOpenAPICtrl.1")
+    if connect == 1:
+        # API 연결
+        kiwoom.dynamicCall("CommConnect()")
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MyWindow()
     window.show()
+    connectKiwoom(1)
 
     app.exec_()
-    # try this
