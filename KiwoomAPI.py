@@ -12,7 +12,9 @@ class KiwoomAPI:
 
     def get_market_code(self):
         # GetCodeListByMarket 으로 종목코드 요청
-        result = self.kiwoom.dynamicCall('GetCodeListByMarket(QString)', '10')
+        #result = self.kiwoom.dynamicCall('GetCodeListByMarket(QString)', ['0'])
+        result = self.kiwoom.dynamicCall("GetCodeListByMarket(QString)", ["0"])
+        return result
         code_list = result.split(';')
         return code_list
 

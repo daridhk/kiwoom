@@ -146,6 +146,7 @@ class MyWindow(Ui_Dialog, QDialog):
         self.tableWidget.setEditTriggers(QAbstractItemView.AllEditTriggers)
         #self.chbox = QCheckBox()
         #self.tableWidget.setCellWidget(0,1, self.chbox)
+        self.connectKiwoom()
 
     def start_transaction(self):
         print('start_transaction')
@@ -156,18 +157,24 @@ class MyWindow(Ui_Dialog, QDialog):
         self.worker.terminate()
         print('stop_transaction')
 
+    def connectKiwoom(self):
+        self.kiwoom = QAxWidget("KHOPENAPI.KHOpenAPICtrl.1")
+        self.kiwoom.dynamicCall("CommConnect()")
 
-def connectKiwoom(self, connect=1):
-    kiwoom = QAxWidget("KHOPENAPI.KHOpenAPICtrl.1")
-    if connect == 1:
-        # API 연결
-        kiwoom.dynamicCall("CommConnect()")
+    def get_market_code(self):
+        # GetCodeListByMarket 으로 종목코드 요청
+        #result = self.kiwoom.dynamicCall('GetCodeListByMarket(QString)', ['0'])
+        result = self.kiwoom.dynamicCall("GetCodeListByMarket(QString)", ["0"])
+        return result
+        code_list = result.split(';')
+        return code_list
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MyWindow()
     window.show()
-    kiwoom = KiwoomAPI()
-    codes = kiwoom.get_market_code()
+    #kiwoom = KiwoomAPI()
+    #codes = kiwoom.get_market_code()
+    codes = window.get_market_code()
     print(codes)
     app.exec_()
