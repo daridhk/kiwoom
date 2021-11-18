@@ -7,6 +7,7 @@ from PyQt5.QtCore import QCoreApplication, QDateTime, Qt
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5 import uic
 import pandas as pd
+from KiwoomAPI import *
 
 from Worker import Worker
 from tableWidget import *
@@ -126,7 +127,6 @@ class KiwoomAPIWindow(QMainWindow):
         df = pd.DataFrame(data_list, columns=['회사명', '종목코드'])
         print(df.head())
 
-
 Form_class, Window_class = uic.loadUiType("tableWidget.ui")
 
 class MyWindow2(Form_class, Window_class):
@@ -167,6 +167,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MyWindow()
     window.show()
-    connectKiwoom(1)
-
+    kiwoom = KiwoomAPI()
+    codes = kiwoom.get_market_code()
+    print(codes)
     app.exec_()
