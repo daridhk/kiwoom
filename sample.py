@@ -22,13 +22,15 @@ class MyWindow(QMainWindow):
 
     def btn1_clicked(self):
         ret = self.kiwoom.dynamicCall("GetCodeListByMarket(QString)", ["0"])
+        print(ret)
         kospi_code_list = ret.split(';')
-        kospi_code_name_list = []
+        print(kospi_code_list)
 
+        kospi_code_name_list = []
         for x in kospi_code_list:
             name = self.kiwoom.dynamicCall("GetMasterCodeName(QString)", [x])
             kospi_code_name_list.append(x + " : " + name)
-
+        print(kospi_code_name_list)
         self.listWidget.addItems(kospi_code_name_list)
 
 if __name__ == "__main__":
