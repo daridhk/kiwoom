@@ -7,7 +7,7 @@ from PyQt5.QtCore import QCoreApplication, QDateTime, Qt
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5 import uic
 import pandas as pd
-from KiwoomAPI import *
+from StockAPI import *
 
 from Worker import Worker
 from tableWidget import *

@@ -1,10 +1,10 @@
 from PyQt5.QAxContainer import *
 
-class KiwoomAPI:
+class StockAPI:
     def __init__(self, connect=1):
-        self.connectKiwoom(connect)
+        self.connectStock(connect)
 
-    def connectKiwoom(self, connect=1):
+    def connectStock(self, connect=1):
         self.kiwoom = QAxWidget("KHOPENAPI.KHOpenAPICtrl.1")
         if connect == 1:
             # API 연결
@@ -21,3 +21,4 @@ class KiwoomAPI:
     def get_name(self, code):
         name = self.kiwoom.dynamicCall('GetMasterCodeName(QString)', code)
         return name
+
