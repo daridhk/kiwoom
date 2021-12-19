@@ -1,17 +1,19 @@
 import sys
 import time
+import datetime
 
 from PyQt5.QtWidgets import *
 from PyQt5.QAxContainer import *
 from PyQt5.QtCore import QCoreApplication, QDateTime, Qt
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5 import uic
-import pandas as pd
-from StockAPI import *
 
+import StockAPI
 from Worker import Worker
 from tableWidget import *
+import stock_config
 
+'''
 class KiwoomAPIWindow(QMainWindow):
     def __init__(self, connect=1):
         super().__init__()
@@ -126,14 +128,17 @@ class KiwoomAPIWindow(QMainWindow):
         # 데이터 프레임으로 만들기
         df = pd.DataFrame(data_list, columns=['회사명', '종목코드'])
         print(df.head())
+'''
 
 Form_class, Window_class = uic.loadUiType("tableWidget.ui")
 
+'''
 class MyWindow2(Form_class, Window_class):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
         self.btnStart.setEnabled(False)
+'''
 
 class MyWindow(Ui_Dialog, QDialog):
     def __init__(self):
@@ -146,35 +151,53 @@ class MyWindow(Ui_Dialog, QDialog):
         self.tableWidget.setEditTriggers(QAbstractItemView.AllEditTriggers)
         #self.chbox = QCheckBox()
         #self.tableWidget.setCellWidget(0,1, self.chbox)
-        self.connectKiwoom()
+        self.stock_api = StockAPI.StockAPI()
+        self.stock_api.connectStock()
+        self.stock_api.OnReceiveRealData.connect(self._handler_real_data)
+        self.stock_api.OnReceiveTrData.connect(self._handler_tr_data)
+        self.codes = stock_config.StockConfig().get_codes()
+
+    def _handler_tr_data(self, screen_no, rqname, trcode, record_name, next):
+        if next == '2':
+            self.remained_data = True
+        else:
+            self.remained_data = False
+
+        if rqname == "opt10081_req":
+            self._opt10081(rqname, trcode)
+
+        print("_handler_tr_data called")
+
+    def _handler_real_data(self, code, real_type, data):
+        if real_type == "주식체결":
+            # 체결 시간
+            time = self.stock_api.GetCommRealData(code, 20)
+            # 현재가
+            price = self.stock_api.GetCommRealData(code, 10)
+            date = datetime.datetime.now().strftime("%Y-%m-%d ")
+            time = datetime.datetime.strptime(date + time, "%Y-%m-%d %H%M%S")
+            print(code, time, price)
 
     def start_transaction(self):
         print('start_transaction')
-        self.worker = Worker(self)
-        self.worker.start()
+        # self.worker = Worker(self)
+        # self.worker.start()
+        today = datetime.date.today().strftime('%Y%m%d')
+        for index, code in enumerate(self.codes):
+            self.stock_api.SetRealReg(str(index), code, "20;10", 0)
+            self.parent.stock_api.get_code_data(code, today)
+
+        #self.stock_api.SetRealReg(self.codes[0], self.codes[0], "20;10", 0)
 
     def stop_transaction(self):
-        self.worker.terminate()
+        # self.worker.terminate()
         print('stop_transaction')
-
-    def connectKiwoom(self):
-        self.kiwoom = QAxWidget("KHOPENAPI.KHOpenAPICtrl.1")
-        self.kiwoom.dynamicCall("CommConnect()")
-
-    def get_market_code(self):
-        # GetCodeListByMarket 으로 종목코드 요청
-        #result = self.kiwoom.dynamicCall('GetCodeListByMarket(QString)', ['0'])
-        result = self.kiwoom.dynamicCall("GetCodeListByMarket(QString)", ["0"])
-        return result
-        code_list = result.split(';')
-        return code_list
+        for code in self.codes:
+            self.stock_api.DisConnectRealData(code)
+        #self.stock_api.DisConnectRealData(self.codes[0])
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MyWindow()
     window.show()
-    #kiwoom = KiwoomAPI()
-    #codes = kiwoom.get_market_code()
-    codes = window.get_market_code()
-    print(codes)
     app.exec_()
