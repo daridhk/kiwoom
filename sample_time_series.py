@@ -6,7 +6,7 @@ import time
 
 TR_REQ_TIME_INTERVAL = 0.2
 
-class Kiwoom(QAxWidget):
+class KiwAPI(QAxWidget):
     def __init__(self):
         super().__init__()
         self._create_kiwoom_instance()
@@ -72,7 +72,7 @@ class Kiwoom(QAxWidget):
         except AttributeError:
             pass
 
-    def _opt10081(self, rqname, trcode):
+    def _opt10081_full(self, rqname, trcode):
         data_cnt = self._get_repeat_cnt(trcode, rqname)
 
         for i in range(data_cnt):
@@ -84,20 +84,35 @@ class Kiwoom(QAxWidget):
             volume = self._comm_get_data(trcode, "", rqname, i, "거래량")
             print(date, open, high, low, close, volume)
 
+    def _opt10081(self, rqname, trcode):
+        data_cnt = self._get_repeat_cnt(trcode, rqname)
+        i=0
+        date = self._comm_get_data(trcode, "", rqname, i, "일자")
+        open = self._comm_get_data(trcode, "", rqname, i, "시가")
+        high = self._comm_get_data(trcode, "", rqname, i, "고가")
+        low = self._comm_get_data(trcode, "", rqname, i, "저가")
+        close = self._comm_get_data(trcode, "", rqname, i, "현재가")
+        volume = self._comm_get_data(trcode, "", rqname, i, "거래량")
+        print(date, open, high, low, close, volume)
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    kiwoom = Kiwoom()
+    kiwoom = KiwAPI()
     kiwoom.comm_connect()
 
-    # opt10081 TR 요청
-    kiwoom.set_input_value("종목코드", "005930")
-    kiwoom.set_input_value("기준일자", "20211122")
-    kiwoom.set_input_value("수정주가구분", 1)
-    kiwoom.comm_rq_data("opt10081_req", "opt10081", 0, "0101")
-
-    while kiwoom.remained_data == True:
+    while True:
         time.sleep(TR_REQ_TIME_INTERVAL)
+        # opt10081 TR 요청
         kiwoom.set_input_value("종목코드", "005930")
         kiwoom.set_input_value("기준일자", "20211122")
         kiwoom.set_input_value("수정주가구분", 1)
-        kiwoom.comm_rq_data("opt10081_req", "opt10081", 2, "0101")
+        kiwoom.comm_rq_data("opt10081_req", "opt10081", 0, "0101")
+
+'''
+        while kiwoom.remained_data == True:
+            time.sleep(TR_REQ_TIME_INTERVAL)
+            kiwoom.set_input_value("종목코드", "005930")
+            kiwoom.set_input_value("기준일자", "20211122")
+            kiwoom.set_input_value("수정주가구분", 1)
+            kiwoom.comm_rq_data("opt10081_req", "opt10081", 2, "0101")
+'''
