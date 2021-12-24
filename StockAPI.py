@@ -47,20 +47,22 @@ class StockAPI(QAxWidget):
 
     def get_code_data(self, code, date):
         print('start', inspect.stack()[0][3], code, date)
-        self.set_input_value("종목코드", code)
-        self.set_input_value("기준일자", date)
-        self.set_input_value("수정주가구분", 1)
-        self.comm_rq_data("opt10081_req", "opt10081", 0, "0101")
+        self.SetInputValue("종목코드", code)
+        self.SetInputValue("기준일자", date)
+        self.SetInputValue("수정주가구분", 1)
+        self.CommRqData("opt10081_req", "opt10081", 0, "0101")
         print('end', inspect.stack()[0][3], code, date)
 
-
-    def set_input_value(self, id, value):
+    def SetInputValue(self, id, value):
         self.dynamicCall("SetInputValue(QString, QString)", id, value)
 
-    def comm_rq_data(self, rqname, trcode, next, screen_no):
+    def commKwRqData(self, arrCode, next, codeCount, typeFlag, rQName, screenNo):
+        self.dynamicCall("CommKwRqData(QString, QBoolean, int, int, QString, QString)", arrCode, next, codeCount, typeFlag, rQName, screenNo)
+
+    def CommRqData(self, rqname, trcode, next, screen_no):
         self.dynamicCall("CommRqData(QString, QString, int, QString", rqname, trcode, next, screen_no)
-        self.tr_event_loop = QEventLoop()
-        self.tr_event_loop.exec_()
+        #self.tr_event_loop = QEventLoop()
+        #self.tr_event_loop.exec_()
 
     def _receive_tr_data(self, screen_no, rqname, trcode, record_name, next, unused1, unused2, unused3, unused4):
         if next == '2':
@@ -77,34 +79,37 @@ class StockAPI(QAxWidget):
             pass
 
     def _opt10081_full(self, rqname, trcode):
-        data_cnt = self._get_repeat_cnt(trcode, rqname)
+        data_cnt = self.GetRepeatCnt(trcode, rqname)
 
         for i in range(data_cnt):
-            date = self._comm_get_data(trcode, "", rqname, i, "일자")
-            open = self._comm_get_data(trcode, "", rqname, i, "시가")
-            high = self._comm_get_data(trcode, "", rqname, i, "고가")
-            low = self._comm_get_data(trcode, "", rqname, i, "저가")
-            close = self._comm_get_data(trcode, "", rqname, i, "현재가")
-            volume = self._comm_get_data(trcode, "", rqname, i, "거래량")
+            date = self.CommGetData(trcode, "", rqname, i, "일자")
+            open = self.CommGetData(trcode, "", rqname, i, "시가")
+            high = self.CommGetData(trcode, "", rqname, i, "고가")
+            low = self.CommGetData(trcode, "", rqname, i, "저가")
+            close = self.CommGetData(trcode, "", rqname, i, "현재가")
+            volume = self.CommGetData(trcode, "", rqname, i, "거래량")
             print(date, open, high, low, close, volume)
 
     def _opt10081(self, rqname, trcode):
-        data_cnt = self._get_repeat_cnt(trcode, rqname)
+        data_cnt = self.GetRepeatCnt(trcode, rqname)
         i=0
-        date = self._comm_get_data(trcode, "", rqname, i, "일자")
-        open = self._comm_get_data(trcode, "", rqname, i, "시가")
-        high = self._comm_get_data(trcode, "", rqname, i, "고가")
-        low = self._comm_get_data(trcode, "", rqname, i, "저가")
-        close = self._comm_get_data(trcode, "", rqname, i, "현재가")
-        volume = self._comm_get_data(trcode, "", rqname, i, "거래량")
+        date = self.CommGetData(trcode, "", rqname, i, "일자")
+        open = self.CommGetData(trcode, "", rqname, i, "시가")
+        high = self.CommGetData(trcode, "", rqname, i, "고가")
+        low = self.CommGetData(trcode, "", rqname, i, "저가")
+        close = self.CommGetData(trcode, "", rqname, i, "현재가")
+        volume = self.CommGetData(trcode, "", rqname, i, "거래량")
         print(date, open, high, low, close, volume)
 
-    def _comm_get_data(self, code, real_type, field_name, index, item_name):
-        ret = self.dynamicCall("CommGetData(QString, QString, QString, int, QString", code,
-                               real_type, field_name, index, item_name)
+    def CommGetData(self, code, real_type, field_name, index, item_name):
+        ret = self.dynamicCall("CommGetData(QString, QString, QString, int, QString", code, real_type, field_name, index, item_name)
         return ret.strip()
 
-    def _get_repeat_cnt(self, trcode, rqname):
+    def GetCommData(self, code, field_name, index, item_name):
+        ret = self.dynamicCall("GetCommData(QString, QString, int, QString)", code, field_name, index, item_name)
+        return ret.strip()
+
+    def GetRepeatCnt(self, trcode, rqname):
         ret = self.dynamicCall("GetRepeatCnt(QString, QString)", trcode, rqname)
         return ret
 
@@ -118,3 +123,25 @@ class StockAPI(QAxWidget):
     def GetCommRealData(self, code, fid):
         data = self.dynamicCall("GetCommRealData(QString, int)", code, fid)
         return data
+
+    def SendOrder(self, rqname, screen_no, acc_no, order_type, code, quantity, price, hoga, order_no):
+        self.dynamicCall("SendOrder(QString, QString, QString, int, QString, int, int, QString, QString)", [rqname, screen_no, acc_no, order_type, code, quantity, price, hoga, order_no])
+
+    def GetChejanData(self, fid):
+        '''
+        FID	설명
+        9203	주문번호
+        302	종목명
+        900	주문수량
+        901	주문가격
+        902	미체결수량
+        904	원주문번호
+        905	주문구분
+        908	주문/체결시간
+        909	체결번호
+        910	체결가
+        911	체결량
+        10	현재가, 체결가, 실시간종가
+        '''
+        ret = self.dynamicCall("GetChejanData(int)", fid)
+        return ret

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1187</width>
-    <height>277</height>
+    <height>469</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,9 +17,9 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>90</y>
+     <y>60</y>
      <width>1131</width>
-     <height>121</height>
+     <height>331</height>
     </rect>
    </property>
    <property name="sizeIncrement">
@@ -32,11 +32,18 @@
     <cursorShape>ArrowCursor</cursorShape>
    </property>
    <property name="rowCount">
-    <number>3</number>
+    <number>10</number>
    </property>
    <property name="columnCount">
     <number>10</number>
    </property>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
    <row/>
    <row/>
    <row/>
@@ -131,7 +138,7 @@
    <property name="geometry">
     <rect>
      <x>570</x>
-     <y>230</y>
+     <y>410</y>
      <width>121</width>
      <height>41</height>
     </rect>
@@ -144,7 +151,7 @@
    <property name="geometry">
     <rect>
      <x>1030</x>
-     <y>230</y>
+     <y>410</y>
      <width>111</width>
      <height>41</height>
     </rect>
@@ -157,13 +164,39 @@
    <property name="geometry">
     <rect>
      <x>710</x>
-     <y>230</y>
+     <y>410</y>
      <width>121</width>
      <height>41</height>
     </rect>
    </property>
    <property name="text">
     <string>Stop</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnBuy">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>410</y>
+     <width>121</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Long</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnSell">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>410</y>
+     <width>121</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Short</string>
    </property>
   </widget>
  </widget>

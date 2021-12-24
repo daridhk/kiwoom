@@ -14,12 +14,12 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(1187, 277)
+        Dialog.resize(1187, 469)
         self.tableWidget = QtWidgets.QTableWidget(Dialog)
-        self.tableWidget.setGeometry(QtCore.QRect(40, 90, 1131, 121))
+        self.tableWidget.setGeometry(QtCore.QRect(40, 60, 1131, 331))
         self.tableWidget.setSizeIncrement(QtCore.QSize(1, 1))
         self.tableWidget.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.ArrowCursor))
-        self.tableWidget.setRowCount(3)
+        self.tableWidget.setRowCount(10)
         self.tableWidget.setColumnCount(10)
         self.tableWidget.setObjectName("tableWidget")
         item = QtWidgets.QTableWidgetItem()
@@ -52,14 +52,20 @@ class Ui_Dialog(object):
         self.lineEdit.setGeometry(QtCore.QRect(900, 30, 141, 20))
         self.lineEdit.setObjectName("lineEdit")
         self.btnStart = QtWidgets.QPushButton(Dialog)
-        self.btnStart.setGeometry(QtCore.QRect(570, 230, 121, 41))
+        self.btnStart.setGeometry(QtCore.QRect(570, 410, 121, 41))
         self.btnStart.setObjectName("btnStart")
         self.btnClose = QtWidgets.QPushButton(Dialog)
-        self.btnClose.setGeometry(QtCore.QRect(1030, 230, 111, 41))
+        self.btnClose.setGeometry(QtCore.QRect(1030, 410, 111, 41))
         self.btnClose.setObjectName("btnClose")
         self.btnStop = QtWidgets.QPushButton(Dialog)
-        self.btnStop.setGeometry(QtCore.QRect(710, 230, 121, 41))
+        self.btnStop.setGeometry(QtCore.QRect(710, 410, 121, 41))
         self.btnStop.setObjectName("btnStop")
+        self.btnBuy = QtWidgets.QPushButton(Dialog)
+        self.btnBuy.setGeometry(QtCore.QRect(80, 410, 121, 41))
+        self.btnBuy.setObjectName("btnBuy")
+        self.btnSell = QtWidgets.QPushButton(Dialog)
+        self.btnSell.setGeometry(QtCore.QRect(220, 410, 121, 41))
+        self.btnSell.setObjectName("btnSell")
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -92,6 +98,8 @@ class Ui_Dialog(object):
         self.btnStart.setText(_translate("Dialog", "Start"))
         self.btnClose.setText(_translate("Dialog", "Close"))
         self.btnStop.setText(_translate("Dialog", "Stop"))
+        self.btnBuy.setText(_translate("Dialog", "Long"))
+        self.btnSell.setText(_translate("Dialog", "Short"))
 
 
 if __name__ == "__main__":
