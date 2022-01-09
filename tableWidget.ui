@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>My title</string>
+   <string>StockManager</string>
   </property>
   <widget class="QTableWidget" name="tableWidget">
    <property name="geometry">
@@ -49,7 +49,7 @@
    <row/>
    <column>
     <property name="text">
-     <string>item</string>
+     <string>종목</string>
     </property>
    </column>
    <column>
@@ -64,27 +64,27 @@
    </column>
    <column>
     <property name="text">
-     <string>budg</string>
+     <string>보유가</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>one pr</string>
+     <string>매입가</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>market</string>
+     <string>현재가</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>prof</string>
+     <string>보유량</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>target</string>
+     <string>수익률(%)</string>
     </property>
    </column>
    <column>
