@@ -22,11 +22,14 @@ COL_STEP = 2
 COL_BALANCE = 3
 COL_PURCHASE_PRICE = 4
 COL_MARKET = 5
+COL_QUANTITY = 6
 COL_TARGET_PERCENT = 6
 COL_YIELD = 7
 COL_GOSTOP = 8
 COL_PERIOD = 9
 
+INDEX_TARGET_YIELD = 0
+INDEX_SELL_PERCENT = 1
 
 '''
 Form_class, Window_class = uic.loadUiType("tableWidget.ui")
@@ -48,6 +51,8 @@ class MyWindow(Ui_Dialog, QDialog):
 
         self.btnClose.clicked.connect(QCoreApplication.instance().quit)
 
+        self.btnSell.hide()
+        self.btnBuy.hide()
         self.btnSell.clicked.connect(self.sell_transaction)
         self.btnBuy.clicked.connect(self.buy_transaction)
 
@@ -62,9 +67,10 @@ class MyWindow(Ui_Dialog, QDialog):
         self.stock_api.OnReceiveChejanData.connect(self._handler_chejan_data)
         self.stock_api.OnReceiveMsg.connect(self._handler_receive_msg)
 
-        self.codes = stock_config.StockConfig().get_codes()
+        self.codes, self.plans, self.leave = stock_config.StockConfig().load_config()
+
+        # self.codes = stock_config.StockConfig().get_codes()
         self.asset = stock_config.StockConfig().load_settings(self.codes)
-        # print(self.asset)
 
 
     def _handler_tr_data(self, screen_no, rqname, trcode, record_name, next):
@@ -138,7 +144,7 @@ class MyWindow(Ui_Dialog, QDialog):
             stock_present_price = self.stock_api.GetCommData(sTrCode, sRQName, i, "현재가")
             stock_present_price = int(stock_present_price)
 
-            #print('종목', stock_code, stock_name, stock_evaluation_profit_and_loss, stock_yield, stock_buy_money, stock_quantity, stock_trade_quantity, stock_present_price)
+            print('종목', stock_code, stock_name, stock_evaluation_profit_and_loss, stock_yield, stock_buy_money, stock_quantity, stock_trade_quantity, stock_present_price)
             self.asset[stock_code]['name'] = stock_name
             self.asset[stock_code]['purchase_price'] = stock_buy_money
             self.asset[stock_code]['quantity'] = stock_quantity
@@ -189,13 +195,15 @@ class MyWindow(Ui_Dialog, QDialog):
             time = datetime.datetime.strptime(date + time, "%Y-%m-%d %H%M%S")
             self.asset[code]['market'] = price
             self._setTable(self.asset[code]['index'], COL_MARKET, price)
-            self.sell_logic()
+            # self.sell_logic()
+            self.sell_item(code, self.asset[code]['purchase_price'], price)
 
         self.enable_all_button()
 
     def _handler_chejan_data(self, gubun, item_cnt, fid_list):
         print('_handler_chejan_data', gubun, item_cnt, fid_list)
         print(self.stock_api.GetChejanData(9203), self.stock_api.GetChejanData(302), self.stock_api.GetChejanData(900), self.stock_api.GetChejanData(901))
+        self.sell_transaction_event_loop.exit()
         self.enable_all_button()
 
     def _handler_receive_msg(self, scr_no, rq_name, tr_code, msg):
@@ -218,22 +226,18 @@ class MyWindow(Ui_Dialog, QDialog):
 
     def start_transaction(self):
         self.disable_all_button()
+        self.btnStart.setEnabled(False)
+
         print('start_transaction')
-        # self.worker = Worker(self)
-        # self.worker.start()
-
         self.account_number = self._get_account()
-
         print('waiting for _get_account_balance() completes ----------------------')
         self._get_balance()
-
         self._get_market_price()
-
         print('asset ----------------------')
         for code in self.codes:
             print(self.asset[code])
-
         self._fill_table()
+        self._fill_plans()
 
         self._start_real_time_market_price()
 
@@ -250,11 +254,12 @@ class MyWindow(Ui_Dialog, QDialog):
             self._setTable(index, COL_NAME, code+'('+asset['name']+')')
             self._setTable(index, COL_BUGDGT, asset['t_budget'])
             self._setTable(index, COL_STEP, asset['step'])
-            # self._setTable(index, COL_BALANCE, str(int(asset['market'])*int(asset['quantity'])))
+            self._setTable(index, COL_BALANCE, int(asset['market'])*int(asset['quantity']))
             self._setTable(index, COL_PURCHASE_PRICE, asset['purchase_price'])
             self._setTable(index, COL_MARKET, asset['market'])
-            self._setTable(index, COL_TARGET_PERCENT, asset['target_percent'])
-            self._setTable(index, COL_YIELD, asset['yield'])
+            self._setTable(index, COL_QUANTITY, asset['quantity'])
+            #self._setTable(index, COL_TARGET_PERCENT, asset['target_percent'])
+            self._setTable(index, COL_YIELD, asset['yield']*100.0)
             self._setTable(index, COL_GOSTOP, asset['gostop'])
             self._setTable(index, COL_PERIOD, asset['period'])
             #purchase_price':0, 'quantity':0, 'market_price':0, 'target_percent': 0.1, 'yield': 0, 'gostop': True, 'period': 24}
@@ -262,19 +267,28 @@ class MyWindow(Ui_Dialog, QDialog):
     def _setTable(self, row, col, value):
         self.tableWidget.setItem(row, col, QTableWidgetItem(str(value)))
 
+    def _fill_plans(self):
+        for index, plan in enumerate(self.plans):
+            self._setPlan(index, 0, plan[0])
+            self._setPlan(index, 1, plan[1])
+
+    def _setPlan(self, row, col, value):
+        self.tableTarget.setItem(row, col, QTableWidgetItem(str(value)))
+
     def stop_transaction(self):
         # self.worker.terminate()
         print('stop_transaction')
         for code in self.codes:
             self.stock_api.DisConnectRealData(code)
+        self.btnStart.setEnabled(True)
 
     def sell_transaction(self):
         self.disable_all_button()
         order_type_lookup = {'신규매수': 1, '신규매도': 2, '매수취소': 3, '매도취소': 4}
         hoga_lookup = {'지정가': "00", '시장가': "03"}
 
-        # account = self.account_number
-        account = '8011118411'
+        account = self.account_number
+        # account = '8011118411'
         order_type = 2
         code = self.codes[2]
         hoga = '03'
@@ -283,6 +297,8 @@ class MyWindow(Ui_Dialog, QDialog):
 
         print('sell_transaction', "send_order_req", "21", account, order_type, code, num, price, hoga, "")
         self.stock_api.SendOrder("send_order_req", "21", account, order_type, code, num, price, hoga, "")
+        self.sell_transaction_event_loop= QtCore.QEventLoop()
+        self.sell_transaction_event_loop.exec_()
 
     def buy_transaction(self):
         self.disable_all_button()
@@ -291,8 +307,8 @@ class MyWindow(Ui_Dialog, QDialog):
         order_type_lookup = {'신규매수': 1, '신규매도': 2, '매수취소': 3, '매도취소': 4}
         hoga_lookup = {'지정가': "00", '시장가': "03"}
 
-        # account = self.account_number
-        account = '8011118411'
+        account = self.account_number
+        # account = '8011118411'
         order_type = 1
         code = self.codes[2]
         hoga = '03'
@@ -303,18 +319,70 @@ class MyWindow(Ui_Dialog, QDialog):
         self.stock_api.SendOrder("send_order_req", "20", account, order_type, code, num, price, hoga, "")
 
     def enable_all_button(self):
-        self.btnSell.setEnabled(True)
-        self.btnBuy.setEnabled(True)
-        self.btnStart.setEnabled(True)
-
+        # self.btnSell.setEnabled(True)
+        # self.btnBuy.setEnabled(True)
+        # self.btnStart.setEnabled(True)
+        self.btnClose.setEnabled(True)
 
     def disable_all_button(self):
-        self.btnSell.setEnabled(False)
-        self.btnBuy.setEnabled(False)
-        self.btnStart.setEnabled(False)
+        # self.btnSell.setEnabled(False)
+        # self.btnBuy.setEnabled(False)
+        # self.btnStart.setEnabled(False)
+        self.btnClose.setEnabled(False)
 
     def sell_logic(self):
         print('do sell logic')
+
+    def sell_item(self, code, purchase, price):
+        step = self.asset[code]['step']
+        sellYN, next_step, sell_percent = self.meet_sell_condition(step, purchase, price)
+        if sellYN:
+            self.asset[code]['step'] = next_step
+            sell_quantity = self.get_sell_quantity(code, sell_percent)
+            self.sell_item_transaction(code, sell_quantity)
+
+    def meet_sell_condition(self, step, purchase, price):
+        profit = (price-purchase)*100/purchase
+        next_step = len(self.plans) - 1
+        while next_step >= step:
+            if profit > self.plans[next_step][INDEX_TARGET_YIELD]:
+                return True, next_step+1, self.plans[next_step][INDEX_SELL_PERCENT]
+            next_step -= 1
+        return False, 0, 0
+
+        '''
+        for next_step, plan in reversed(list(enumerate(self.plans))):
+            if next_step >= step and profit > plan[INDEX_TARGET_YIELD]:
+                return True, next_step+1, plan[INDEX_SELL_PERCENT]
+        return False, 0, 0
+        '''
+
+    def get_sell_quantity(self, code, sell_percent):
+        current_quantity = self.asset[code]['quantity']
+        sell_quantity = int(current_quantity*sell_percent)
+        return sell_quantity
+
+    def sell_item_transaction(self, code, sell_quantity):
+        self.disable_all_button()
+        order_type_lookup = {'신규매수': 1, '신규매도': 2, '매수취소': 3, '매도취소': 4}
+        hoga_lookup = {'지정가': "00", '시장가': "03"}
+
+        account = self.account_number
+        order_type = order_type_lookup['신규매도']
+        hoga = hoga_lookup['시장가']
+
+        # price is not used
+        price = 100000000
+
+        print('sell_item_transaction', "send_order_req", "21", account, order_type, code, sell_quantity, price, hoga, "")
+        self.stock_api.SendOrder("send_order_req", "21", account, order_type, code, sell_quantity, price, hoga, "")
+
+        self._get_balance()
+        self._fill_table()
+
+        self.sell_transaction_event_loop= QtCore.QEventLoop()
+        self.sell_transaction_event_loop.exec_()
+        self.enable_all_button()
 
     def buy_logic(self):
         print('buy logic')

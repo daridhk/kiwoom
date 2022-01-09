@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\tableWidget.ui'
+# Form implementation generated from reading ui file 'tableWidget.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.4
 #
@@ -89,23 +89,23 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "My title"))
+        Dialog.setWindowTitle(_translate("Dialog", "StockManager"))
         item = self.tableWidget.horizontalHeaderItem(0)
-        item.setText(_translate("Dialog", "item"))
+        item.setText(_translate("Dialog", "종목"))
         item = self.tableWidget.horizontalHeaderItem(1)
         item.setText(_translate("Dialog", "expected pri"))
         item = self.tableWidget.horizontalHeaderItem(2)
         item.setText(_translate("Dialog", "차수"))
         item = self.tableWidget.horizontalHeaderItem(3)
-        item.setText(_translate("Dialog", "budg"))
+        item.setText(_translate("Dialog", "보유가"))
         item = self.tableWidget.horizontalHeaderItem(4)
-        item.setText(_translate("Dialog", "one pr"))
+        item.setText(_translate("Dialog", "매입가"))
         item = self.tableWidget.horizontalHeaderItem(5)
-        item.setText(_translate("Dialog", "market"))
+        item.setText(_translate("Dialog", "현재가"))
         item = self.tableWidget.horizontalHeaderItem(6)
-        item.setText(_translate("Dialog", "prof"))
+        item.setText(_translate("Dialog", "보유량"))
         item = self.tableWidget.horizontalHeaderItem(7)
-        item.setText(_translate("Dialog", "target"))
+        item.setText(_translate("Dialog", "수익률(%)"))
         item = self.tableWidget.horizontalHeaderItem(8)
         item.setText(_translate("Dialog", "y/n"))
         item = self.tableWidget.horizontalHeaderItem(9)
