@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'tableWidget.ui'
+# Form implementation generated from reading ui file '.\tableWidget.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.4
 #
@@ -16,7 +16,7 @@ class Ui_Dialog(object):
         Dialog.setObjectName("Dialog")
         Dialog.resize(1187, 469)
         self.tableWidget = QtWidgets.QTableWidget(Dialog)
-        self.tableWidget.setGeometry(QtCore.QRect(40, 60, 1131, 331))
+        self.tableWidget.setGeometry(QtCore.QRect(40, 60, 851, 331))
         self.tableWidget.setSizeIncrement(QtCore.QSize(1, 1))
         self.tableWidget.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.ArrowCursor))
         self.tableWidget.setRowCount(10)
@@ -66,6 +66,23 @@ class Ui_Dialog(object):
         self.btnSell = QtWidgets.QPushButton(Dialog)
         self.btnSell.setGeometry(QtCore.QRect(220, 410, 121, 41))
         self.btnSell.setObjectName("btnSell")
+        self.tableTarget = QtWidgets.QTableWidget(Dialog)
+        self.tableTarget.setGeometry(QtCore.QRect(920, 60, 251, 201))
+        self.tableTarget.setSizeIncrement(QtCore.QSize(1, 1))
+        self.tableTarget.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.tableTarget.setRowCount(5)
+        self.tableTarget.setColumnCount(2)
+        self.tableTarget.setObjectName("tableTarget")
+        item = QtWidgets.QTableWidgetItem()
+        self.tableTarget.setHorizontalHeaderItem(0, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableTarget.setHorizontalHeaderItem(1, item)
+        self.editProfit = QtWidgets.QLineEdit(Dialog)
+        self.editProfit.setGeometry(QtCore.QRect(1040, 270, 121, 20))
+        self.editProfit.setObjectName("editProfit")
+        self.label_3 = QtWidgets.QLabel(Dialog)
+        self.label_3.setGeometry(QtCore.QRect(925, 270, 111, 20))
+        self.label_3.setObjectName("label_3")
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -100,6 +117,11 @@ class Ui_Dialog(object):
         self.btnStop.setText(_translate("Dialog", "Stop"))
         self.btnBuy.setText(_translate("Dialog", "Long"))
         self.btnSell.setText(_translate("Dialog", "Short"))
+        item = self.tableTarget.horizontalHeaderItem(0)
+        item.setText(_translate("Dialog", "Target (%)"))
+        item = self.tableTarget.horizontalHeaderItem(1)
+        item.setText(_translate("Dialog", "Sell (%)"))
+        self.label_3.setText(_translate("Dialog", "Preserve profit (%)"))
 
 
 if __name__ == "__main__":

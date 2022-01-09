@@ -16,6 +16,18 @@ from Worker import Worker
 from tableWidget import *
 import stock_config
 
+COL_NAME = 0
+COL_BUGDGT = 1
+COL_STEP = 2
+COL_BALANCE = 3
+COL_PURCHASE_PRICE = 4
+COL_MARKET = 5
+COL_TARGET_PERCENT = 6
+COL_YIELD = 7
+COL_GOSTOP = 8
+COL_PERIOD = 9
+
+
 '''
 Form_class, Window_class = uic.loadUiType("tableWidget.ui")
 
@@ -51,20 +63,23 @@ class MyWindow(Ui_Dialog, QDialog):
         self.stock_api.OnReceiveMsg.connect(self._handler_receive_msg)
 
         self.codes = stock_config.StockConfig().get_codes()
-        self.watch = {}
+        self.asset = stock_config.StockConfig().load_settings(self.codes)
+        # print(self.asset)
+
 
     def _handler_tr_data(self, screen_no, rqname, trcode, record_name, next):
-        print('_handler_tr_data', screen_no, rqname, trcode, record_name, next)
+        # print('_handler_tr_data', screen_no, rqname, trcode, record_name, next)
+        '''
         if next == '2':
             self.remained_data = True
         else:
             self.remained_data = False
-
+        '''
         if rqname == 'commKwRqData':
             self._commKwRqData(rqname, trcode)
         elif rqname == "계좌평가잔고내역요청":
             self._handler_get_balance(rqname, trcode, next)
-        if sRQName == "예수금상세현황요청":
+        if rqname == "예수금상세현황요청":
             self._handler_get_cash(rqname, trcode)
         elif rqname == 'send_order_req':
             print('rqname == send_order_req')
@@ -79,6 +94,16 @@ class MyWindow(Ui_Dialog, QDialog):
         #self.cancel_screen_number(self.screen_my_account)
         #self.get_deposit_loop.exit()
 
+    def _get_balance(self, nPrevNext=0):
+        # print('_get_account_evaluation_balance started')
+        self.stock_api.SetInputValue("계좌번호", self.account_number)
+        self.stock_api.SetInputValue("비밀번호", " ")
+        self.stock_api.SetInputValue("비밀번호입력매체구분", "00")
+        self.stock_api.SetInputValue("조회구분", "1")
+        self.stock_api.CommRqData("계좌평가잔고내역요청", "opw00018", nPrevNext, "10")
+        self.account_event_loop = QtCore.QEventLoop()
+        self.account_event_loop.exec_()
+
     def _handler_get_balance(self, sRQName, sTrCode, sPrevNext=0):
         total_buy_money = self.stock_api.GetCommData(sTrCode, sRQName, 0, "총매입금액")
         self.total_sell_money = int(total_buy_money)
@@ -90,7 +115,7 @@ class MyWindow(Ui_Dialog, QDialog):
         total_yield = self.stock_api.GetCommData(sTrCode, sRQName, 0, "총수익률(%)")
         self.total_yield = float(total_yield)
 
-        print(total_buy_money, total_evaluation_money, total_evaluation_profit_and_loss_money)
+        #print(total_buy_money, total_evaluation_money, total_evaluation_profit_and_loss_money)
 
         cnt = self.stock_api.GetRepeatCnt(sTrCode, sRQName)
 
@@ -113,10 +138,24 @@ class MyWindow(Ui_Dialog, QDialog):
             stock_present_price = self.stock_api.GetCommData(sTrCode, sRQName, i, "현재가")
             stock_present_price = int(stock_present_price)
 
-            print('종목', stock_code, stock_name, stock_evaluation_profit_and_loss, stock_yield, stock_buy_money, stock_quantity, stock_trade_quantity, stock_present_price)
+            #print('종목', stock_code, stock_name, stock_evaluation_profit_and_loss, stock_yield, stock_buy_money, stock_quantity, stock_trade_quantity, stock_present_price)
+            self.asset[stock_code]['name'] = stock_name
+            self.asset[stock_code]['purchase_price'] = stock_buy_money
+            self.asset[stock_code]['quantity'] = stock_quantity
+            self.asset[stock_code]['market'] = stock_present_price
+
+            '''
+            self.asset[code] = {'index': i, 'code': code, 'name': name, 'price': market_price}
+            self.tableWidget.setItem(self.asset[code]['index'], 0, QTableWidgetItem(self.asset[code]['code']))
+            self.tableWidget.setItem(self.asset[code]['index'], 1, QTableWidgetItem(self.asset[code]['name']))
+            self.tableWidget.setItem(self.asset[code]['index'], 2, QTableWidgetItem(self.asset[code]['price']))
+            '''
+            #print(self.asset[stock_code])
 
         if sPrevNext == "2":
-            self._get_account_evaluation_balance("2")
+            self._get_balance("2")
+        else:
+            self.account_event_loop.exit()
         #else:
         #    self.cancel_screen_number(self.screen_my_account)
         #    self.get_account_evaluation_balance_loop.exit()
@@ -128,18 +167,13 @@ class MyWindow(Ui_Dialog, QDialog):
             code = self.stock_api.CommGetData(trcode, "", rqname, i, "종목코드")
             name = self.stock_api.CommGetData(trcode, "", rqname, i, "종목명")
             market_price = self.stock_api.CommGetData(trcode, "", rqname, i, "현재가")
-            print(code, name, market_price)
-            self.watch[code] = {'index': i, 'code': code, 'name': name, 'price': market_price}
-            self.tableWidget.setItem(self.watch[code]['index'], 0, QTableWidgetItem(self.watch[code]['code']))
-            self.tableWidget.setItem(self.watch[code]['index'], 1, QTableWidgetItem(self.watch[code]['name']))
-            self.tableWidget.setItem(self.watch[code]['index'], 2, QTableWidgetItem(self.watch[code]['price']))
 
-        self.enable_all_button()
+            self.asset[code]['name'] = name
+            self.asset[code]['market'] = market_price
 
         #for code in self.codes:
         #    print(self.asset[code])
-
-        self._start_real_time_market_price()
+        self.market_price_event_loop.exit()
 
     def _start_real_time_market_price(self):
         for index, code in enumerate(self.codes):
@@ -153,8 +187,10 @@ class MyWindow(Ui_Dialog, QDialog):
             price = self.stock_api.GetCommRealData(code, 10)
             date = datetime.datetime.now().strftime("%Y-%m-%d ")
             time = datetime.datetime.strptime(date + time, "%Y-%m-%d %H%M%S")
-            self.watch[code]['price'] = price
-            self.tableWidget.setItem(self.watch[code]['index'], 2, QTableWidgetItem(self.watch[code]['price']))
+            self.asset[code]['market'] = price
+            self._setTable(self.asset[code]['index'], COL_MARKET, price)
+            self.sell_logic()
+
         self.enable_all_button()
 
     def _handler_chejan_data(self, gubun, item_cnt, fid_list):
@@ -163,23 +199,21 @@ class MyWindow(Ui_Dialog, QDialog):
         self.enable_all_button()
 
     def _handler_receive_msg(self, scr_no, rq_name, tr_code, msg):
-        print("receive_msg, rq_name = " + rq_name + ", tr_code = " + tr_code + ", msg = " + msg)
+        # print("receive_msg, rq_name = " + rq_name + ", tr_code = " + tr_code + ", msg = " + msg)
         self.enable_all_button()
 
     def _get_account(self):
         account_num = self.stock_api.GetLoginInfo('ACCNO')
         account_num = account_num.split(';')[0]
-        print(account_num)
+        # print(account_num)
         return account_num
         # == 8011118411;
 
-    def _get_account_evaluation_balance(self, nPrevNext=0):
-        print('_get_account_evaluation_balance started')
-        self.stock_api.SetInputValue("계좌번호", self.account_number)
-        self.stock_api.SetInputValue("비밀번호", " ")
-        self.stock_api.SetInputValue("비밀번호입력매체구분", "00")
-        self.stock_api.SetInputValue("조회구분", "1")
-        self.stock_api.CommRqData("계좌평가잔고내역요청", "opw00018", nPrevNext, "10")
+    def _get_market_price(self):
+        code_chain = ';'.join(self.codes)
+        self.stock_api.commKwRqData(code_chain, False, len(self.codes), 0, 'commKwRqData', '1')
+        self.market_price_event_loop= QtCore.QEventLoop()
+        self.market_price_event_loop.exec_()
 
 
     def start_transaction(self):
@@ -187,14 +221,46 @@ class MyWindow(Ui_Dialog, QDialog):
         print('start_transaction')
         # self.worker = Worker(self)
         # self.worker.start()
+
         self.account_number = self._get_account()
-        codesString = ';'.join(self.codes)
-        self.stock_api.commKwRqData(codesString, False, len(self.codes), 0, 'commKwRqData', '1')
-        self._get_account_evaluation_balance()
+
+        print('waiting for _get_account_balance() completes ----------------------')
+        self._get_balance()
+
+        self._get_market_price()
+
+        print('asset ----------------------')
+        for code in self.codes:
+            print(self.asset[code])
+
+        self._fill_table()
+
+        self._start_real_time_market_price()
+
+        self.enable_all_button()
+
         #for index, code in enumerate(self.codes):
         #    self.stock_api.SetRealReg(str(index), code, "20;10", 0)
 
         #self.stock_api.SetRealReg(self.codes[0], self.codes[0], "20;10", 0)
+
+    def _fill_table(self):
+        for index, code in enumerate(self.codes):
+            asset = self.asset[code]
+            self._setTable(index, COL_NAME, code+'('+asset['name']+')')
+            self._setTable(index, COL_BUGDGT, asset['t_budget'])
+            self._setTable(index, COL_STEP, asset['step'])
+            # self._setTable(index, COL_BALANCE, str(int(asset['market'])*int(asset['quantity'])))
+            self._setTable(index, COL_PURCHASE_PRICE, asset['purchase_price'])
+            self._setTable(index, COL_MARKET, asset['market'])
+            self._setTable(index, COL_TARGET_PERCENT, asset['target_percent'])
+            self._setTable(index, COL_YIELD, asset['yield'])
+            self._setTable(index, COL_GOSTOP, asset['gostop'])
+            self._setTable(index, COL_PERIOD, asset['period'])
+            #purchase_price':0, 'quantity':0, 'market_price':0, 'target_percent': 0.1, 'yield': 0, 'gostop': True, 'period': 24}
+
+    def _setTable(self, row, col, value):
+        self.tableWidget.setItem(row, col, QTableWidgetItem(str(value)))
 
     def stop_transaction(self):
         # self.worker.terminate()
@@ -246,6 +312,12 @@ class MyWindow(Ui_Dialog, QDialog):
         self.btnSell.setEnabled(False)
         self.btnBuy.setEnabled(False)
         self.btnStart.setEnabled(False)
+
+    def sell_logic(self):
+        print('do sell logic')
+
+    def buy_logic(self):
+        print('buy logic')
 
 
 if __name__ == "__main__":
