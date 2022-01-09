@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1187</width>
-    <height>277</height>
+    <height>469</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,9 +17,9 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>90</y>
-     <width>1131</width>
-     <height>121</height>
+     <y>60</y>
+     <width>851</width>
+     <height>331</height>
     </rect>
    </property>
    <property name="sizeIncrement">
@@ -32,11 +32,18 @@
     <cursorShape>ArrowCursor</cursorShape>
    </property>
    <property name="rowCount">
-    <number>3</number>
+    <number>10</number>
    </property>
    <property name="columnCount">
     <number>10</number>
    </property>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
    <row/>
    <row/>
    <row/>
@@ -131,7 +138,7 @@
    <property name="geometry">
     <rect>
      <x>570</x>
-     <y>230</y>
+     <y>410</y>
      <width>121</width>
      <height>41</height>
     </rect>
@@ -144,7 +151,7 @@
    <property name="geometry">
     <rect>
      <x>1030</x>
-     <y>230</y>
+     <y>410</y>
      <width>111</width>
      <height>41</height>
     </rect>
@@ -157,13 +164,102 @@
    <property name="geometry">
     <rect>
      <x>710</x>
-     <y>230</y>
+     <y>410</y>
      <width>121</width>
      <height>41</height>
     </rect>
    </property>
    <property name="text">
     <string>Stop</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnBuy">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>410</y>
+     <width>121</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Long</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnSell">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>410</y>
+     <width>121</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Short</string>
+   </property>
+  </widget>
+  <widget class="QTableWidget" name="tableTarget">
+   <property name="geometry">
+    <rect>
+     <x>920</x>
+     <y>60</y>
+     <width>251</width>
+     <height>201</height>
+    </rect>
+   </property>
+   <property name="sizeIncrement">
+    <size>
+     <width>1</width>
+     <height>1</height>
+    </size>
+   </property>
+   <property name="cursor" stdset="0">
+    <cursorShape>ArrowCursor</cursorShape>
+   </property>
+   <property name="rowCount">
+    <number>5</number>
+   </property>
+   <property name="columnCount">
+    <number>2</number>
+   </property>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <column>
+    <property name="text">
+     <string>Target (%)</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Sell (%)</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QLineEdit" name="editProfit">
+   <property name="geometry">
+    <rect>
+     <x>1040</x>
+     <y>270</y>
+     <width>121</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>925</x>
+     <y>270</y>
+     <width>111</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Preserve profit (%)</string>
    </property>
   </widget>
  </widget>
