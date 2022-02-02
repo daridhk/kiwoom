@@ -4,7 +4,7 @@ import time
 
 from PyQt5.QtWidgets import *
 from PyQt5.QAxContainer import *
-from PyQt5.QtCore import QCoreApplication, QDateTime, Qt, QObject, pyqtSlot, pyqtSignal
+from PyQt5.QtCore import QCoreApplication, QDateTime, Qt, QObject, pyqtSlot, pyqtSignal, QTimer
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5 import uic
 '''
@@ -12,21 +12,23 @@ at pyCharm terminal,
 python -m PyQt5.uic.pyuic -x tableWidget.ui -o tableWidget.py
 '''
 import StockAPI
-from Worker import Worker
+# from Worker import Worker
 from tableWidget import *
 import stock_config
 
 COL_NAME = 0
-COL_BUGDGT = 1
-COL_STEP = 2
-COL_BALANCE = 3
-COL_PURCHASE_PRICE = 4
-COL_MARKET = 5
-COL_QUANTITY = 6
-COL_TARGET_PERCENT = 6 
-COL_YIELD = 7
-COL_GOSTOP = 8
-COL_PERIOD = 9
+COL_CHANGE_YN = 1
+COL_SELL_YN = 2
+#COL_BUGDGT = 1
+COL_STEP = 3
+COL_BALANCE = 4
+COL_PURCHASE_PRICE = 5
+COL_MARKET = 6
+COL_QUANTITY = 7
+COL_TARGET_PERCENT = 8
+COL_YIELD = 8
+COL_GOSTOP = 9
+COL_PERIOD = 10
 
 INDEX_TARGET_YIELD = 0
 INDEX_SELL_PERCENT = 1
@@ -59,6 +61,7 @@ class MyWindow(Ui_Dialog, QDialog):
         #self.btnSell.clicked.connect(self.sell_transaction)
         #self.btnBuy.clicked.connect(self.buy_transaction)
 
+        self.tableWidget.setColumnWidth(0, 150)
         self.tableWidget.setEditTriggers(QAbstractItemView.AllEditTriggers)
 
         #self.chbox = QCheckBox()
@@ -72,16 +75,26 @@ class MyWindow(Ui_Dialog, QDialog):
 
         self.codes, self.plans, self.leave, self.asset = stock_config.StockConfig().load_config()
 
-        self.screen_nubmer_get_balance = "10"
-        self.get_market_price_screen_number = 1
+        self.screen_nubmer_get_balance = "0010"
+        # self.get_market_price_screen_number = 1
+        self.screen_number_market_price = "0001"
 
-        self.balance_signal = async_signal()
-        self.balance_signal.connect(self.async_get_balance)
+        # self.balance_signal = async_signal()
+        # self.balance_signal.connect(self.async_get_balance)
+
+        '''
         self.worker = Worker(self)
         self.worker_table_update = False
         self.worker_start = False
         self.worker_sleep = 2
         self.worker.start()
+        '''
+
+        self.timer_period = 1000
+        self.timer_count = 0
+        self.timer_worker = QTimer(self)
+        self.timer_worker.setInterval(self.timer_period)
+        self.timer_worker.timeout.connect(self.timer_worker_sell)
 
     def _handler_tr_data(self, screen_no, rqname, trcode, record_name, next):
         print('_handler_tr_data', screen_no, rqname, trcode, record_name, next)
@@ -99,7 +112,7 @@ class MyWindow(Ui_Dialog, QDialog):
             self._handler_get_cash(rqname, trcode)
         elif rqname == 'send_order_req':
             print('rqname == send_order_req')
-            # self.sell_transaction_event_loop.exit()
+            self.sell_transaction_event_loop.exit()
 
     def _handler_get_cash(self, sRQName, sTrCode):
         deposit = self.stock_api.GetCommData(sTrCode, sRQName, 0, "예수금")
@@ -119,10 +132,12 @@ class MyWindow(Ui_Dialog, QDialog):
         self.stock_api.SetInputValue("비밀번호입력매체구분", "00")
         self.stock_api.SetInputValue("조회구분", "1")
         print('_get_account_evaluation_balance started middle 2')
+        '''
         if self.screen_nubmer_get_balance == "10":
             self.screen_nubmer_get_balance = "11"
         else:
             self.screen_nubmer_get_balance = "10"
+        '''
         res = self.stock_api.CommRqData("계좌평가잔고내역요청", "opw00018", nPrevNext, self.screen_nubmer_get_balance)
         print('result CommRqData = ', res)
         if nPrevNext==0:
@@ -226,10 +241,12 @@ class MyWindow(Ui_Dialog, QDialog):
             date = datetime.datetime.now().strftime("%Y-%m-%d ")
             time = datetime.datetime.strptime(date + time, "%Y-%m-%d %H%M%S")
             print(time, code, price)
+            self.asset[code]['change_yn'] = 'Y'
             self.asset[code]['market'] = price
+            self._setTable(self.asset[code]['index'], COL_CHANGE_YN, 'Y')
             self._setTable(self.asset[code]['index'], COL_MARKET, price)
             # self.sell_logic()
-            self.sell_item(code, self.asset[code]['purchase_price'], price)
+            # self.sell_item(code, self.asset[code]['purchase_price'], price)
 
         # self.enable_all_button()
 
@@ -251,12 +268,15 @@ class MyWindow(Ui_Dialog, QDialog):
 
     def get_market_price(self):
         code_chain = ';'.join(self.codes)
+        '''
         self.get_market_price_screen_number += 1
         if self.get_market_price_screen_number>200:
             self.get_market_price_screen_number = 1
         screen_number = '%04d' % self.get_market_price_screen_number
         print('screen number = ', screen_number)
         self.stock_api.commKwRqData(code_chain, False, len(self.codes), 0, 'commKwRqData', screen_number)
+        '''
+        self.stock_api.commKwRqData(code_chain, False, len(self.codes), 0, 'commKwRqData', self.screen_number_market_price)
         self.market_price_event_loop= QtCore.QEventLoop()
         print('self.market_price_event_loop.exec_()')
         self.market_price_event_loop.exec_()
@@ -269,31 +289,29 @@ class MyWindow(Ui_Dialog, QDialog):
         print('start_transaction')
         self.account_number = self._get_account()
         print('waiting for _get_account_balance() completes ----------------------')
-        self.worker_start = True
+        # self.worker_start = not True
 
         self.get_balance()
-        #time.sleep(1)
-        # self.get_market_price()
+        self.get_market_price()
+
         print('asset ----------------------')
         for code in self.codes:
             print(self.asset[code])
-        # self._fill_table()
-        # self._fill_plans()
+        self._fill_table()
+        self._fill_plans()
+
         time.sleep(1)
         self._start_real_time_market_price()
 
-        # self.enable_all_button()
-
-        #for index, code in enumerate(self.codes):
-        #    self.stock_api.SetRealReg(str(index), code, "20;10", 0)
-
-        #self.stock_api.SetRealReg(self.codes[0], self.codes[0], "20;10", 0)
+        self.timer_worker.start()
 
     def _fill_table(self):
         for index, code in enumerate(self.codes):
             asset = self.asset[code]
             self._setTable(index, COL_NAME, code+'('+asset['name']+')')
-            self._setTable(index, COL_BUGDGT, asset['t_budget'])
+            self._setTable(index, COL_CHANGE_YN, asset['change_yn'])
+            self._setTable(index, COL_SELL_YN, asset['sell_yn'])
+            # self._setTable(index, COL_BUGDGT, asset['t_budget'])
             self._setTable(index, COL_STEP, asset['step'])
             self._setTable(index, COL_BALANCE, int(asset['market'])*int(asset['quantity']))
             self._setTable(index, COL_PURCHASE_PRICE, asset['purchase_price'])
@@ -318,7 +336,7 @@ class MyWindow(Ui_Dialog, QDialog):
 
     def stop_transaction(self):
         # self.worker.terminate()
-        self.worker_start = False
+        # self.worker_start = False
 
         print('stop_transaction')
         for code in self.codes:
@@ -376,24 +394,34 @@ class MyWindow(Ui_Dialog, QDialog):
         self.btnClose.setEnabled(False)
 
     def sell_item(self, code, purchase, price):
-        print('calling self.balance_signal.emit()')
-        self.balance_signal.emit()
-        return
-
-        if self.asset[code]['quantity'] <= 0:
-            return
-        step = self.asset[code]['step']
-        sellYN, next_step, sell_percent = self.meet_sell_condition(step, purchase, price)
-        if sellYN:
-            self.asset[code]['step'] = next_step
-            sell_quantity = self.get_sell_quantity(code, sell_percent)
-            self.sell_item_transaction(code, sell_quantity)
+        if self.asset[code]['quantity'] > 0:
+            step = self.asset[code]['step']
+            sellYN, next_step, sell_percent = self.meet_sell_condition(step, purchase, price)
+            if sellYN:
+                self.asset[code]['step'] = next_step
+                sell_quantity = self.get_sell_quantity(code, sell_percent)
+                self.sell_item_transaction(code, sell_quantity)
+                self.get_balance()
+                self._fill_table()
 
     def async_get_balance(self):
         print("signal async_get_balance .... ")
+        print('timer signal async_get_balance :', self.timer_count)
+        self.timer_count += 1
         self.get_balance()
         self._fill_table()
         # stock_config.StockConfig().save_config()
+
+    def timer_worker_sell(self):
+        print('doing timer_worker_sell +++++++++++')
+        for code in self.codes:
+            if self.asset[code]['change_yn'] == 'Y':
+                self.sell_item(code, self.asset[code]['purchase_price'], self.asset[code]['market'])
+                self._reset_change_yn(code)
+
+    def _reset_change_yn(self, code):
+        self.asset[code]['change_yn'] = '.'
+        self._setTable(self.asset[code]['index'], COL_CHANGE_YN, self.asset[code]['change_yn'])
 
     def meet_sell_condition(self, step, purchase, price):
         purchase = abs(int(purchase))
@@ -437,8 +465,8 @@ class MyWindow(Ui_Dialog, QDialog):
         error_code = self.stock_api.SendOrder("send_order_req", "21", account, order_type, code, sell_quantity, price, hoga, "")
         if error_code != 0:
             print("error = ", error_code)
-        # self.sell_transaction_event_loop= QtCore.QEventLoop()
-        # self.sell_transaction_event_loop.exec_()
+        self.sell_transaction_event_loop= QtCore.QEventLoop()
+        self.sell_transaction_event_loop.exec_()
 
 
 
