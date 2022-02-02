@@ -15,6 +15,7 @@ class StockAPI(QAxWidget):
 
     def _create_kiwoom_instance(self):
         self.setControl("KHOPENAPI.KHOpenAPICtrl.1")
+        pass
 
     def _set_signal_slots(self):
         # server connect 관련 event 발생 시 callback
@@ -60,7 +61,7 @@ class StockAPI(QAxWidget):
         self.dynamicCall("CommKwRqData(QString, QBoolean, int, int, QString, QString)", arrCode, next, codeCount, typeFlag, rQName, screenNo)
 
     def CommRqData(self, rqname, trcode, next, screen_no):
-        self.dynamicCall("CommRqData(QString, QString, int, QString", rqname, trcode, next, screen_no)
+        return self.dynamicCall("CommRqData(QString, QString, int, QString", rqname, trcode, next, screen_no)
         #self.tr_event_loop = QEventLoop()
         #self.tr_event_loop.exec_()
 
@@ -125,7 +126,8 @@ class StockAPI(QAxWidget):
         return data
 
     def SendOrder(self, rqname, screen_no, acc_no, order_type, code, quantity, price, hoga, order_no):
-        self.dynamicCall("SendOrder(QString, QString, QString, int, QString, int, int, QString, QString)", [rqname, screen_no, acc_no, order_type, code, quantity, price, hoga, order_no])
+        res = self.dynamicCall("SendOrder(QString, QString, QString, int, QString, int, int, QString, QString)", [rqname, screen_no, acc_no, order_type, code, quantity, price, hoga, order_no])
+        return res
 
     def GetChejanData(self, fid):
         '''

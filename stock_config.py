@@ -1,6 +1,7 @@
 import json
 
 class StockConfig:
+    """
     def get_codes(self):
         # return ['002360', '001440', '001510']
         return ['000660', '051910', '000270', '005930']
@@ -28,20 +29,25 @@ class StockConfig:
         dict_file = open('asset_setting.json', 'w')
         json.dump(asset, dict_file)
         dict_file.close()
+    """
 
-    def get_codes(self):
-        # return ['002360', '001440', '001510']
-        return ['000660', '051910', '000270', '005930']
+    def init_asset(self, codes):
+        # read saved file
+        asset = {}
+        for index, code in enumerate(codes):
+            asset[code] = {'index': index, 'name':'N/A', 't_budget': 10000000, 'step':0, 't_balance':0, 'purchase_price':0, 'quantity':0, 'market_price':0, 'target_percent': 0.1, 'yield': 0, 'gostop': True, 'period': 24}
+        return asset
 
     def init_config(self):
         codes = ['000660', '051910', '000270', '005930']
         plans = [[3, 10], [5, 20], [7, 30], [10, 50], [15, 90]]
         leave = [5]
-        return codes, plans, leave
+        asset = self.init_asset(codes)
+        return codes, plans, leave, asset
 
-    def save_config(self, codes, plans, leave):
+    def save_config(self, codes, plans, leave, asset):
         json_file = open('config.json', 'w')
-        json.dump({'codes': codes, 'plans': plans, 'leave': leave}, json_file)
+        json.dump({'codes': codes, 'plans': plans, 'leave': leave, 'asset': asset}, json_file)
         json_file.close()
 
     def load_config(self):
@@ -49,6 +55,6 @@ class StockConfig:
             json_file = open('config.json', 'r')
             dict = json.load(json_file)
             json_file.close()
-            return dict['codes'], dict['plans'], dict['leave']
+            return dict['codes'], dict['plans'], dict['leave'], dict['asset']
         except:
             return self.init_config()
