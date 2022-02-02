@@ -35,7 +35,7 @@ class StockConfig:
         # read saved file
         asset = {}
         for index, code in enumerate(codes):
-            asset[code] = {'index': index, 'name':'N/A', 't_budget': 10000000, 'step':0, 't_balance':0, 'purchase_price':0, 'quantity':0, 'market_price':0, 'target_percent': 0.1, 'yield': 0, 'gostop': True, 'period': 24}
+            asset[code] = {'index': index, 'name':'N/A', 't_budget': 10000000, 'change_yn': '.', 'sell_yn': '.', 'step':0, 't_balance':0, 'purchase_price':0, 'quantity':0, 'market_price':0, 'target_percent': 0.1, 'yield': 0, 'gostop': True, 'period': 24}
         return asset
 
     def init_config(self):
