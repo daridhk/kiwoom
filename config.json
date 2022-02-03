@@ -46,7 +46,7 @@
       "yield": 0,
       "gostop": true,
       "period": 24,
-      "market": "+126000"
+      "market": "+125500"
     },
     "051910": {
       "index": 1,
@@ -63,7 +63,7 @@
       "yield": 0,
       "gostop": true,
       "period": 24,
-      "market": "+674000"
+      "market": "+673000"
     },
     "000270": {
       "index": 2,
