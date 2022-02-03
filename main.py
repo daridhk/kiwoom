@@ -57,9 +57,9 @@ class MyWindow(Ui_Dialog, QDialog):
         self.btnClose.clicked.connect(QCoreApplication.instance().quit)
 
         self.btnSell.hide()
-        self.btnBuy.hide()
+        # self.btnBuy.hide()
         #self.btnSell.clicked.connect(self.sell_transaction)
-        #self.btnBuy.clicked.connect(self.buy_transaction)
+        self.btnBuy.clicked.connect(self.buy_transaction)
 
         self.tableWidget.setColumnWidth(0, 150)
         self.tableWidget.setEditTriggers(QAbstractItemView.AllEditTriggers)
@@ -95,6 +95,8 @@ class MyWindow(Ui_Dialog, QDialog):
         self.timer_worker = QTimer(self)
         self.timer_worker.setInterval(self.timer_period)
         self.timer_worker.timeout.connect(self.timer_worker_sell)
+
+        self.start_update()
 
     def _handler_tr_data(self, screen_no, rqname, trcode, record_name, next):
         print('_handler_tr_data', screen_no, rqname, trcode, record_name, next)
@@ -282,13 +284,12 @@ class MyWindow(Ui_Dialog, QDialog):
         self.market_price_event_loop.exec_()
 
 
-    def start_transaction(self):
+    def start_update(self):
         # self.disable_all_button()
         # self.btnStart.setEnabled(False)
 
-        print('start_transaction')
+        print('start_update')
         self.account_number = self._get_account()
-        print('waiting for _get_account_balance() completes ----------------------')
         # self.worker_start = not True
 
         self.get_balance()
@@ -298,17 +299,25 @@ class MyWindow(Ui_Dialog, QDialog):
         for code in self.codes:
             print(self.asset[code])
         self._fill_table()
+        stock_config.StockConfig().save_config(self.codes, self.plans, self.leave, self.asset)
         self._fill_plans()
 
         time.sleep(1)
         self._start_real_time_market_price()
 
+    def start_transaction(self):
+        print('start_transaction')
         self.timer_worker.start()
+
+    def stop_transaction(self):
+        print('stop_transaction')
+        self.timer_worker.stop()
 
     def _fill_table(self):
         for index, code in enumerate(self.codes):
             asset = self.asset[code]
             self._setTable(index, COL_NAME, code+'('+asset['name']+')')
+            # self._setTable(index, COL_NAME, code + '(' + 'oooo' + ')')
             self._setTable(index, COL_CHANGE_YN, asset['change_yn'])
             self._setTable(index, COL_SELL_YN, asset['sell_yn'])
             # self._setTable(index, COL_BUGDGT, asset['t_budget'])
@@ -334,15 +343,6 @@ class MyWindow(Ui_Dialog, QDialog):
     def _setPlan(self, row, col, value):
         self.tableTarget.setItem(row, col, QTableWidgetItem(str(value)))
 
-    def stop_transaction(self):
-        # self.worker.terminate()
-        # self.worker_start = False
-
-        print('stop_transaction')
-        for code in self.codes:
-            self.stock_api.DisConnectRealData(code)
-        self.btnStart.setEnabled(True)
-
     '''
     def sell_transaction(self):
         self.disable_all_button()
@@ -361,7 +361,7 @@ class MyWindow(Ui_Dialog, QDialog):
         self.stock_api.SendOrder("send_order_req", "21", account, order_type, code, num, price, hoga, "")
         self.sell_transaction_event_loop= QtCore.QEventLoop()
         self.sell_transaction_event_loop.exec_()
-
+    '''
     def buy_transaction(self):
         self.disable_all_button()
         print('buy_transaction')
@@ -372,14 +372,15 @@ class MyWindow(Ui_Dialog, QDialog):
         account = self.account_number
         # account = '8011118411'
         order_type = 1
-        code = self.codes[2]
+        code = self.codes[3]
         hoga = '03'
-        num = 7
+        num = 14
         price = 100
 
-        print('sell_transaction', "send_order_req", "20", account, order_type, code, num, price, hoga, "")
+        print('buy_transaction', "send_order_req", "20", account, order_type, code, num, price, hoga, "")
         self.stock_api.SendOrder("send_order_req", "20", account, order_type, code, num, price, hoga, "")
-    '''
+        self.sell_transaction_event_loop= QtCore.QEventLoop()
+        self.sell_transaction_event_loop.exec_()
 
     def enable_all_button(self):
         # self.btnSell.setEnabled(True)
@@ -398,12 +399,19 @@ class MyWindow(Ui_Dialog, QDialog):
             step = self.asset[code]['step']
             sellYN, next_step, sell_percent = self.meet_sell_condition(step, purchase, price)
             if sellYN:
+                self._update_column(code, COL_SELL_YN, 'sell_yn', 'Y')
+            else:
+                self._update_column(code, COL_SELL_YN, 'sell_yn', 'N')
+
+            if sellYN:
                 self.asset[code]['step'] = next_step
                 sell_quantity = self.get_sell_quantity(code, sell_percent)
                 self.sell_item_transaction(code, sell_quantity)
                 self.get_balance()
                 self._fill_table()
+                stock_config.StockConfig().save_config(self.codes, self.plans, self.leave, self.asset)
 
+    '''
     def async_get_balance(self):
         print("signal async_get_balance .... ")
         print('timer signal async_get_balance :', self.timer_count)
@@ -411,17 +419,19 @@ class MyWindow(Ui_Dialog, QDialog):
         self.get_balance()
         self._fill_table()
         # stock_config.StockConfig().save_config()
+    '''
 
     def timer_worker_sell(self):
         print('doing timer_worker_sell +++++++++++')
         for code in self.codes:
+            self._update_column(code, COL_SELL_YN, 'sell_yn', '.')
             if self.asset[code]['change_yn'] == 'Y':
                 self.sell_item(code, self.asset[code]['purchase_price'], self.asset[code]['market'])
-                self._reset_change_yn(code)
+                self._update_column(code, COL_CHANGE_YN, 'change_yn', '.')
 
-    def _reset_change_yn(self, code):
-        self.asset[code]['change_yn'] = '.'
-        self._setTable(self.asset[code]['index'], COL_CHANGE_YN, self.asset[code]['change_yn'])
+    def _update_column(self, code, column, dic_column, value):
+        self.asset[code][dic_column] = value
+        self._setTable(self.asset[code]['index'], column, self.asset[code][dic_column])
 
     def meet_sell_condition(self, step, purchase, price):
         purchase = abs(int(purchase))
@@ -469,12 +479,9 @@ class MyWindow(Ui_Dialog, QDialog):
         self.sell_transaction_event_loop.exec_()
 
 
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MyWindow()
     window.show()
-    window.btnStart.click()
-    print('------------------------------- btn clicked ---------------------')
     app.exec_()
 
