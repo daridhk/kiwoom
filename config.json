@@ -1,0 +1,103 @@
+{
+  "codes": [
+    "000660",
+    "051910",
+    "000270",
+    "005930"
+  ],
+  "plans": [
+    [
+      0.1,
+      10
+    ],
+    [
+      0.2,
+      20
+    ],
+    [
+      0.3,
+      30
+    ],
+    [
+      10,
+      50
+    ],
+    [
+      15,
+      90
+    ]
+  ],
+  "leave": [
+    5
+  ],
+  "asset": {
+    "000660": {
+      "index": 0,
+      "name": "SK\ud558\uc774\ub2c9\uc2a4",
+      "t_budget": 10000000,
+      "change_yn": "Y",
+      "sell_yn": "Y",
+      "step": 3,
+      "t_balance": 0,
+      "purchase_price": 125636,
+      "quantity": 7,
+      "market_price": 0,
+      "target_percent": 0.1,
+      "yield": 0,
+      "gostop": true,
+      "period": 24,
+      "market": "+126000"
+    },
+    "051910": {
+      "index": 1,
+      "name": "LG\ud654\ud559",
+      "t_budget": 10000000,
+      "change_yn": ".",
+      "sell_yn": ".",
+      "step": 3,
+      "t_balance": 0,
+      "purchase_price": 677917,
+      "quantity": 9,
+      "market_price": 0,
+      "target_percent": 0.1,
+      "yield": 0,
+      "gostop": true,
+      "period": 24,
+      "market": "+674000"
+    },
+    "000270": {
+      "index": 2,
+      "name": "\uae30\uc544",
+      "t_budget": 10000000,
+      "change_yn": "Y",
+      "sell_yn": ".",
+      "step": 1,
+      "t_balance": 0,
+      "purchase_price": 81900,
+      "quantity": 12,
+      "market_price": 0,
+      "target_percent": 0.1,
+      "yield": 0,
+      "gostop": true,
+      "period": 24,
+      "market": "-81800"
+    },
+    "005930": {
+      "index": 3,
+      "name": "\uc0bc\uc131\uc804\uc790",
+      "t_budget": 10000000,
+      "change_yn": "Y",
+      "sell_yn": "N",
+      "step": 1,
+      "t_balance": 0,
+      "purchase_price": 74089,
+      "quantity": 101,
+      "market_price": 0,
+      "target_percent": 0.1,
+      "yield": 0,
+      "gostop": true,
+      "period": 24,
+      "market": "+74100"
+    }
+  }
+}
