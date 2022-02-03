@@ -3,10 +3,8 @@ import datetime
 import time
 
 from PyQt5.QtWidgets import *
-from PyQt5.QAxContainer import *
-from PyQt5.QtCore import QCoreApplication, QDateTime, Qt, QObject, pyqtSlot, pyqtSignal, QTimer
-from PyQt5.QtGui import QFont, QIcon
-from PyQt5 import uic
+from PyQt5.QtCore import QCoreApplication, QObject, pyqtSignal, QTimer
+
 '''
 at pyCharm terminal, 
 python -m PyQt5.uic.pyuic -x tableWidget.ui -o tableWidget.py
